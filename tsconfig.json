@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "checkJs": true,
+    "esModuleInterop": true,
+    "lib": [
+      "esnext",
+      "esnext.asynciterable",
+      "dom",
+    ],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "strict": true,
+    "target": "esnext",
+  },
+}

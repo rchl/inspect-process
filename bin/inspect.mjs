@@ -1,17 +1,9 @@
 #!/usr/bin/env node
-'use strict'
 
-/* -----------------------------------------------------------------------------
- * dependencies
- * -------------------------------------------------------------------------- */
-
-// 3rd party
-const _ = require('lodash/fp')
-const yargs = require('yargs')
-const nodeflags = require('nodeflags')
-
-// lib
-const inspect = require('../lib/index')
+import _ from 'lodash'
+import yargs from 'yargs'
+import nodeflags from 'nodeflags'
+import inspect from '../lib/index.mjs'
 
 /* -----------------------------------------------------------------------------
  * usage
@@ -32,7 +24,8 @@ const inspectCliOptions = {
 
 // early parse in order to show inspect specific help options
 // eslint-disable-next-line no-unused-expressions
-yargs.options(inspectCliOptions)
+yargs(process.argv.slice(2))
+  .options(inspectCliOptions)
   .usage('\nUsage:\ninspect [inspect options] [node options] [v8 options] [script] [arguments]')
   .version()
   .help()
@@ -47,7 +40,7 @@ nodeflags((err, flags) => {
     throw new Error(err)
   }
 
-  const parsed = yargs.options(flags).argv
+  const parsed = yargs(process.argv).options(flags).argv
   const args = process.argv.slice(2)
   const cmd = parsed._[0]
   const cmdIndex = args.indexOf(cmd)
@@ -60,13 +53,13 @@ nodeflags((err, flags) => {
   // rather than args because we are not proxying the args to the future
   // child_process
   const inspectKeys = _.keys(inspectCliOptions)
-  const inspectFlags = _.map((key) => '--' + key)(inspectKeys)
-  const inspectOptions = _.pick(inspectKeys)(parsed)
+  const inspectFlags = _.map(inspectKeys, (key) => '--' + key)
+  const inspectOptions = _.pick(parsed, inspectKeys)
 
   // node args are simply processArgs that are not inspectArgs
-  const nodeArgs = _.remove((arg) => {
+  const nodeArgs = _.remove(processArgs, (arg) => {
     return inspectFlags.includes(arg.split('=')[0])
-  })(processArgs)
+  })
 
   inspect(cmd, { nodeArgs, childArgs, inspectOptions })
     .then(() => process.exit())

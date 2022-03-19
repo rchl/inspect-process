@@ -6,15 +6,14 @@
  * -------------------------------------------------------------------------- */
 
 // core
-const spawn = require('child_process').spawn
-const path = require('path')
-const net = require('net')
+import { spawn } from 'child_process'
+import path from 'path'
+import net from 'net'
 
 // 3rd party
-const _ = require('lodash/fp')
-const assert = require('chai').assert
-const stdout = require('test-console').stdout
-const stderr = require('test-console').stderr
+import _ from 'lodash'
+import { assert } from 'chai'
+import { stdout, stderr } from 'test-console'
 
 // lib
 const inspect = require('../lib/index')
