@@ -9,6 +9,7 @@ import inspect from '../lib/index.mjs'
  * usage
  * -------------------------------------------------------------------------- */
 
+/** @type {{ [key: string]: import('yargs').Options }} */
 const inspectCliOptions = {
   'debug-exception': {
     type: 'boolean',
@@ -19,6 +20,11 @@ const inspectCliOptions = {
     description: 'The level to display logs at.',
     choices: ['silly', 'verbose', 'info'],
     default: 'info'
+  },
+  'profile-dir': {
+    type: 'string',
+    description: 'Uses specified profile path for every execution instead of creating a clean one.',
+    default: null,
   }
 }
 
@@ -43,11 +49,9 @@ nodeflags((err, flags) => {
   const parsed = yargs(process.argv).options(flags).argv
   const args = process.argv.slice(2)
   const cmd = parsed._[0]
-  const cmdIndex = args.indexOf(cmd)
-  const processArgs = args.slice(0, cmdIndex)
-
-  // all keys after the cmd should be considered childArgs
-  const childArgs = args.slice(cmdIndex + 1)
+  // TODO: Should support picking node args from cmd
+  const processArgs = []
+  const childArgs = args
 
   // inspectOptions are just picked from our parsed args. We pass "options"
   // rather than args because we are not proxying the args to the future
@@ -56,12 +60,10 @@ nodeflags((err, flags) => {
   const inspectFlags = _.map(inspectKeys, (key) => '--' + key)
   const inspectOptions = _.pick(parsed, inspectKeys)
 
-  // node args are simply processArgs that are not inspectArgs
-  const nodeArgs = _.remove(processArgs, (arg) => {
-    return inspectFlags.includes(arg.split('=')[0])
-  })
+  _.remove(processArgs, (arg) => inspectFlags.includes(arg.split('=')[0]))
+  _.remove(childArgs, (arg) => inspectFlags.includes(arg.split('=')[0]))
 
-  inspect(cmd, { nodeArgs, childArgs, inspectOptions })
+  inspect(cmd, { nodeArgs: processArgs, childArgs, inspectOptions })
     .then(() => process.exit())
     .catch(() => process.exit(1))
 })
